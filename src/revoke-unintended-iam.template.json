@@ -1,0 +1,422 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "77b80578-6d78-455e-bf87-ea2b1d4418cb": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -10,
+                    "y": 250
+                },
+                "z": 0,
+                "embeds": [],
+                "isassociatedwith": [
+                    "61e72e45-380e-4d4c-a7d0-b4380810c240"
+                ]
+            },
+            "61e72e45-380e-4d4c-a7d0-b4380810c240": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 110,
+                    "y": 250
+                },
+                "z": 0,
+                "embeds": [],
+                "isassociatedwith": [
+                    "77b80578-6d78-455e-bf87-ea2b1d4418cb"
+                ]
+            },
+            "94af3fb2-a932-47d5-b6c1-7ba3f3692481": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -10,
+                    "y": 140
+                },
+                "z": 0,
+                "embeds": []
+            },
+            "b5914e28-5738-4bbc-86ac-351498689254": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 110,
+                    "y": 140
+                },
+                "z": 0,
+                "embeds": []
+            },
+            "7ba624f0-e706-4db9-a484-fb7ca1333ff0": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 110,
+                    "y": 30
+                },
+                "z": 0,
+                "embeds": [],
+                "isassociatedwith": [
+                    "94af3fb2-a932-47d5-b6c1-7ba3f3692481"
+                ]
+            },
+            "11be003b-eba2-4470-b51f-3cfaad00c281": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -10,
+                    "y": 30
+                },
+                "z": 0,
+                "embeds": []
+            },
+            "661ed87d-d5a9-457a-8d79-5d0e5500ea46": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 230,
+                    "y": 140
+                },
+                "z": 0,
+                "embeds": []
+            },
+            "767cd971-8752-4fb3-a916-68f7e1a4faee": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 360,
+                    "y": 140
+                },
+                "z": 0,
+                "embeds": []
+            },
+            "8e903abe-473f-4184-ba58-24c04b8a4116": {
+                "size": {
+                    "width": 80,
+                    "height": 80
+                },
+                "position": {
+                    "x": 340,
+                    "y": 250
+                },
+                "z": 0,
+                "embeds": []
+            }
+        }
+    },
+    "Resources": {
+        "AllowIAMAndLogsForLambdaPolicy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "AllowIAMAndLogsForLambdaPolicy",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "AllowIAMAndLogsForLambdaPolicy",
+                            "Effect": "Allow",
+                            "Action": [
+                                "iam:ListGroupsForUser",
+                                "iam:PutUserPolicy",
+                                "iam:AttachUserPolicy",
+                                "iam:ListAttachedUserPolicies",
+                                "iam:ListUserPolicies",
+                                "logs:CreateLogGroup",
+                                "logs:PutLogEvents",
+                                "logs:CreateLogStream",
+                                "sns:Publish"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "RoleThatAllowsIAMandLogsforLambda"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "61e72e45-380e-4d4c-a7d0-b4380810c240"
+                }
+            }
+        },
+        "RoleThatAllowsIAMandLogsforLambda": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "77b80578-6d78-455e-bf87-ea2b1d4418cb"
+                }
+            }
+        },
+        "RevokeIAMAccess": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": "RevokeIAMAccess",
+                "Handler": {
+                    "Ref": "LambdaHandler"
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "RoleThatAllowsIAMandLogsforLambda",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs12.x",
+                "Timeout": 30,
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "LambdaS3BucketName"
+                    },
+                    "S3Key": {
+                        "Ref": "LambdaZipfileName"
+                    }
+                },
+                "Environment": {
+                    "Variables": {
+                        "ADMIN_GROUP_NAME":  {
+                            "Ref": "AdminGroupName"
+                        },
+                        "DENY_POLICY_ARN": {
+                            "Ref": "DenyIAMAccess"
+                        },
+                        "SNS_TOPIC_ARN": {
+                            "Ref": "SNSTopicArn"
+                        }
+                    }
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "94af3fb2-a932-47d5-b6c1-7ba3f3692481"
+                }
+            }
+        },
+        "DetectIAMCallsAndRevokeAccess": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+                "EventPattern": {
+                    "source": [
+                        "aws.iam"
+                    ],
+                    "detail-type": [
+                        "AWS API Call via CloudTrail"
+                    ],
+                    "detail": {
+                        "eventSource": [
+                            "iam.amazonaws.com"
+                        ],
+                        "userIdentity": {
+                            "type": [
+                                "IAMUser"
+                            ]
+                        }
+                    }
+                },
+                "Targets": [
+                    {
+                        "Arn": {
+                            "Fn::GetAtt": [
+                                "RevokeIAMAccess",
+                                "Arn"
+                            ]
+                        },
+                        "Id": "RevokeIAMAccessId"
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "b5914e28-5738-4bbc-86ac-351498689254"
+                }
+            }
+        },
+        "PermissionForEventsToInvokeLambda": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "RevokeIAMAccess"
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "events.amazonaws.com",
+                "SourceArn": {
+                    "Fn::GetAtt": [
+                        "DetectIAMCallsAndRevokeAccess",
+                        "Arn"
+                    ]
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "7ba624f0-e706-4db9-a484-fb7ca1333ff0"
+                }
+            }
+        },
+        "DenyIAMAccess": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "ManagedPolicyName": "DenyIAMAccess",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "DenyIAMAccess",
+                            "Effect": "Deny",
+                            "Action": "iam:*",
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "11be003b-eba2-4470-b51f-3cfaad00c281"
+                }
+            }
+        },
+        "iamTrail": {
+            "Type": "AWS::CloudTrail::Trail",
+            "Properties": {
+                "TrailName": "iamTrail",
+                "IncludeGlobalServiceEvents": true,
+                "IsLogging": true,
+                "IsMultiRegionTrail": true,
+                "S3BucketName": {
+                    "Ref": "TrailDestS3BucketName"
+                },
+                "EnableLogFileValidation": true,
+                "CloudWatchLogsLogGroupArn": {
+                    "Fn::GetAtt": [
+                        "TrailLogGroup",
+                        "Arn"
+                    ]
+                },
+                "CloudWatchLogsRoleArn": {
+                    "Fn::GetAtt": [
+                        "TrailLogGroupRole",
+                        "Arn"
+                    ]
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "661ed87d-d5a9-457a-8d79-5d0e5500ea46"
+                }
+            }
+        },
+        "TrailLogGroupRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "cloudtrail.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": "TrailLogGroupPolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": {
+                                        "Fn::GetAtt": [
+                                            "TrailLogGroup",
+                                            "Arn"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "767cd971-8752-4fb3-a916-68f7e1a4faee"
+                }
+            }
+        },
+        "TrailLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {},
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "8e903abe-473f-4184-ba58-24c04b8a4116"
+                }
+            }
+        }
+    },
+    "Parameters": {
+        "TrailDestS3BucketName": {
+            "Description": "S3 bucket name where CloudTrail can save logs (the bucket policy must be set to allow CloudTrail to write the logs)",
+            "Type": "String"
+        },
+        "LambdaS3BucketName": {
+            "Description": "S3 bucket name where Lambda code resides",
+            "Type": "String"
+        },
+        "LambdaZipfileName": {
+            "Description": "Lambda zipfile name",
+            "Type": "String"
+        },
+        "LambdaHandler": {
+            "Description": "Lambda handler name",
+            "Type": "String",
+            "Default": "index.handler"
+        },
+        "AdminGroupName": {
+            "Description": "",
+            "Type": "String",
+            "Default": "Administrators"
+        },
+        "SNSTopicArn": {
+            "Description": "(optional) ARN of the SNS topic used to notify after successfully revoking IAM permissions",
+            "Type": "String"
+        }
+    }
+}
