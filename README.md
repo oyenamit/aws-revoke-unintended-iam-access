@@ -1,5 +1,5 @@
 # A Solution to Revoke Unwanted IAM permissions in AWS
-This reference solution detects IAM API callers who do not belong to "admins" group and automatically revokes their permissions. Optionally, it then sends an e-mail notification via an SNS topic. The solution is useful in a large organization where number of users grows rapidly and tracking permissions for each user is a challenge. The solution ensures that only users added to "admins" group are given permission to invoke IAM APIs. It is an implementation of the [sample solution](https://aws.amazon.com/blogs/security/how-to-detect-and-automatically-revoke-unintended-iam-access-with-amazon-cloudwatch-events/) proposed by AWS.
+This reference solution detects IAM API callers who do not belong to *"Administrators"* group and automatically revokes their permissions. Optionally, it then sends an e-mail notification via an SNS topic. The solution is useful in a large organization where number of users grows rapidly and tracking permissions for each user is a challenge. It ensures that only users added to *"Administrators"* group are given permission to invoke IAM APIs. It is an implementation of the [sample solution](https://aws.amazon.com/blogs/security/how-to-detect-and-automatically-revoke-unintended-iam-access-with-amazon-cloudwatch-events/) proposed by AWS.
 
 <br/>
 
@@ -24,11 +24,11 @@ The Cloudformation template requires the following input:
 2. *LambdaS3BucketName*: S3 bucket name where Lambda code resides
 3. *LambdaZipfileName*: Lambda code zipfile name
 4. *LambdaHandler*: Lambda code handler name (default: *index.handler*)
-5. *AdminGroupName*: If the user is part of this group, his IAM permissions will not be revoked
+5. *AdminGroupName*: If the user is part of this group, his IAM permissions will not be revoked (default: *Administrators*)
 6. *SNSTopicArn*: Optionaly, you can specify an SNS topic which would be notified after IAM permissions have been revoked
 
 ## Instructions
-1. To test the solution, create an IAM user who is not part of the *"admins"* group but has full privileges for IAM service.
+1. To test the solution, create an IAM user who is not part of the *"Administrators"* group but has full privileges for IAM service.
 2. Login using this user's credentials and perform any IAM configuration change (for example, adding or removing a rule)
 3. The solution will detect this change and deny all IAM permissions for this user.
 4. Verify that the user no longer has access to IAM service by revisting the [AWS Console](https://console.aws.amazon.com/iam/).
@@ -42,7 +42,7 @@ To remove all created resources:
 
 <br/><br/>
 
-> **Note 1**: This solution should be deployed in us-east-1 (N. Virginia) region. This is because IAM is a global service and its API calls are only available to CloudTrail in that region.
+> **Note 1**: This solution should be deployed in us-east-1 (N. Virginia) region. This is because IAM is a global service and its API calls are available to CloudTrail in that region only.
 
 <br/>
 
